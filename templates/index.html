@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Disk Usage Analyzer</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Disk Usage Analyzer</h1>
+      <div class="controls">
+        <label>
+          Path
+          <input type="text" id="pathInput" placeholder="e.g. C:\\Users" />
+        </label>
+        <button id="browseDrives">Drives</button>
+        <label>
+          Max depth
+          <input type="number" id="maxDepth" value="50" min="1" max="200" />
+        </label>
+        <label>
+          <input type="checkbox" id="excludeHidden" checked /> Exclude hidden
+        </label>
+        <label>
+          <input type="checkbox" id="followSymlinks" /> Follow symlinks
+        </label>
+        <button id="scanBtn">Scan</button>
+        <span id="status"></span>
+      </div>
+      <div id="driveList" class="drive-list"></div>
+    </header>
+    <main>
+      <div class="viz-toolbar">
+        <button data-mode="circle" class="mode-btn active">Circle Pack</button>
+        <button data-mode="sunburst" class="mode-btn">Sunburst</button>
+        <span id="currentPath" class="crumbs"></span>
+      </div>
+      <div id="viz"></div>
+      <div id="details"></div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="/static/app.js"></script>
+  </body>
+  </html>
+
+

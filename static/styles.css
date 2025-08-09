@@ -1,0 +1,81 @@
+:root {
+  --bg: #0b1020;
+  --panel: #111939;
+  --text: #e8ecff;
+  --muted: #9aa3c7;
+  --accent: #6aa9ff;
+  --accent-2: #9b59b6;
+  --danger: #ff6b6b;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  background: radial-gradient(80% 80% at 50% 20%, #0d1330, #050814);
+  color: var(--text);
+}
+
+header {
+  padding: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0));
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+h1 { margin: 0 0 8px; font-size: 20px; font-weight: 600; }
+
+.controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+label { color: var(--muted); font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+
+input[type="text"], input[type="number"] {
+  background: var(--panel);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: 8px;
+  outline: none;
+}
+
+button {
+  background: linear-gradient(180deg, #1a2470, #14205b);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover { filter: brightness(1.1); }
+button:active { transform: translateY(1px); }
+
+.drive-list { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+.drive-list .drive { background: var(--panel); padding: 6px 10px; border-radius: 6px; cursor: pointer; border: 1px solid rgba(255,255,255,0.08); }
+.drive-list .drive:hover { border-color: var(--accent); }
+
+main { padding: 12px; }
+
+.viz-toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.mode-btn.active { outline: 2px solid var(--accent); }
+
+#viz { height: calc(100vh - 220px); background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; position: relative; }
+
+svg { width: 100%; height: 100%; }
+
+#details { margin-top: 12px; color: var(--muted); font-size: 14px; }
+
+.tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: #0d1330;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text);
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.crumbs { color: var(--muted); font-size: 12px; margin-left: auto; }
+
+
