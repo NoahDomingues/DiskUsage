@@ -78,4 +78,12 @@ svg { width: 100%; height: 100%; }
 
 .crumbs { color: var(--muted); font-size: 12px; margin-left: auto; }
 
+.icon-btn { display: inline-flex; gap: 6px; align-items: center; }
+.icon { font-size: 14px; }
+.primary { border-color: #2b88ff; background: linear-gradient(180deg, #225ad2, #1a45a5); }
+.danger { border-color: #ff8080; background: linear-gradient(180deg, #b83f3f, #8f2e2e); }
+
+.progress { width: 200px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+.progress-bar { height: 100%; background: linear-gradient(90deg, #6aa9ff, #9b59b6); width: 0%; transition: width 0.2s ease; }
+
 

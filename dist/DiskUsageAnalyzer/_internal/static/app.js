@@ -3,16 +3,19 @@
 const els = {
   pathInput: document.getElementById('pathInput'),
   scanBtn: document.getElementById('scanBtn'),
+  stopBtn: document.getElementById('stopBtn'),
   status: document.getElementById('status'),
   viz: document.getElementById('viz'),
   details: document.getElementById('details'),
   driveList: document.getElementById('driveList'),
   browseDrives: document.getElementById('browseDrives'),
+  browseExplorer: document.getElementById('browseExplorer'),
   maxDepth: document.getElementById('maxDepth'),
   excludeHidden: document.getElementById('excludeHidden'),
   followSymlinks: document.getElementById('followSymlinks'),
   modeBtns: Array.from(document.querySelectorAll('.mode-btn')),
   crumbs: document.getElementById('currentPath'),
+  progressBar: document.getElementById('progressBar'),
 };
 
 function humanSize(bytes) {
@@ -29,6 +32,28 @@ function humanSize(bytes) {
 function setStatus(text) { els.status.textContent = text || ''; }
 function setCrumbs(text) { els.crumbs.textContent = text || ''; }
 
+let scanCtx = { id: null, pollTimer: null, animTimer: null, canceled: false };
+function setButtonsScanning(scanning) {
+  els.scanBtn.disabled = scanning;
+  els.stopBtn.disabled = !scanning;
+}
+function resetProgress() {
+  if (els.progressBar) els.progressBar.style.width = '0%';
+}
+function startIndeterminate() {
+  let w = 5;
+  if (scanCtx.animTimer) clearInterval(scanCtx.animTimer);
+  scanCtx.animTimer = setInterval(() => {
+    w = (w + 7) % 100;
+    els.progressBar.style.width = Math.max(10, w) + '%';
+  }, 150);
+}
+function stopIndeterminate(finalPct = 100) {
+  if (scanCtx.animTimer) clearInterval(scanCtx.animTimer);
+  scanCtx.animTimer = null;
+  els.progressBar.style.width = finalPct + '%';
+}
+
 async function fetchDrives() {
   const res = await fetch('/api/drive_roots');
   const data = await res.json();
@@ -42,26 +67,83 @@ async function fetchDrives() {
   });
 }
 
-async function scan() {
+async function startScan() {
   const path = els.pathInput.value || 'C:\\';
   const max_depth = parseInt(els.maxDepth.value || '50', 10);
   const exclude_hidden = !!els.excludeHidden.checked;
   const follow_symlinks = !!els.followSymlinks.checked;
-  setStatus('Scanning...');
+  setStatus('Starting scan...');
   setCrumbs('');
+  resetProgress();
+  setButtonsScanning(true);
+  scanCtx.canceled = false;
   try {
-    const res = await fetch('/api/scan', {
+    const res = await fetch('/api/scan/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ path, max_depth, exclude_hidden, follow_symlinks }),
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    setStatus('');
-    render(data);
+    scanCtx.id = data.scan_id;
+    setStatus('Scanning...');
+    startIndeterminate();
+    pollStatus();
   } catch (e) {
     console.error(e);
+    setButtonsScanning(false);
     setStatus('Error: ' + e.message);
+  }
+}
+
+async function pollStatus() {
+  if (!scanCtx.id) return;
+  try {
+    const res = await fetch(`/api/scan/status?scan_id=${encodeURIComponent(scanCtx.id)}`);
+    const st = await res.json();
+    if (st.error) throw new Error(st.error);
+    // Update UI
+    setStatus(`${st.state} | files: ${st.files} | bytes: ${humanSize(st.bytes || 0)}${st.current ? ' | current: ' + st.current : ''}`);
+    if (st.state === 'done' && st.result) {
+      stopIndeterminate(100);
+      setButtonsScanning(false);
+      scanCtx.id = null;
+      setStatus('Completed');
+      render(st.result);
+      return;
+    }
+    if (st.state === 'canceled') {
+      stopIndeterminate(0);
+      setButtonsScanning(false);
+      scanCtx.id = null;
+      setStatus('Canceled');
+      return;
+    }
+    if (st.state === 'error') {
+      stopIndeterminate(0);
+      setButtonsScanning(false);
+      scanCtx.id = null;
+      setStatus('Error: ' + (st.error || 'unknown'));
+      return;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  // Schedule next poll
+  scanCtx.pollTimer = setTimeout(pollStatus, 600);
+}
+
+async function stopScan() {
+  if (!scanCtx.id) return;
+  scanCtx.canceled = true;
+  try {
+    await fetch('/api/scan/cancel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scan_id: scanCtx.id }),
+    });
+  } catch (e) {
+    console.error(e);
   }
 }
 
@@ -238,8 +320,16 @@ function renderSunburst(rootData) {
 }
 
 // UI wiring
-els.scanBtn.addEventListener('click', scan);
+els.scanBtn.addEventListener('click', startScan);
+els.stopBtn.addEventListener('click', stopScan);
 els.browseDrives.addEventListener('click', fetchDrives);
+els.browseExplorer.addEventListener('click', async () => {
+  try {
+    const res = await fetch('/api/browse_folder', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ initial: els.pathInput.value || undefined }) });
+    const data = await res.json();
+    if (data && data.path) els.pathInput.value = data.path;
+  } catch (e) { console.error(e); }
+});
 els.modeBtns.forEach((btn) => {
   btn.addEventListener('click', () => {
     els.modeBtns.forEach((b) => b.classList.remove('active'));

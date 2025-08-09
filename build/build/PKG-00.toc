@@ -38,6 +38,10 @@
    'C:\\Users\\Admin\\Documents\\Cursor '
    'Projects\\DiskUsage\\.venv\\Lib\\site-packages\\PyInstaller\\loader\\pyiboot01_bootstrap.py',
    'PYSOURCE'),
+  ('pyi_rth__tkinter',
+   'C:\\Users\\Admin\\Documents\\Cursor '
+   'Projects\\DiskUsage\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth__tkinter.py',
+   'PYSOURCE'),
   ('pyi_rth_inspect',
    'C:\\Users\\Admin\\Documents\\Cursor '
    'Projects\\DiskUsage\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_inspect.py',
